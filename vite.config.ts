@@ -1,30 +1,14 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
     plugins: [react()],
-    resolve: {
-        alias: {
-            '@': path.resolve(__dirname, './'),
-        },
-    },
-    build: {
-        outDir: 'dist',
-        sourcemap: false,
-        minify: 'terser',
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-                    'lucide': ['lucide-react'],
-                },
-            },
-        },
-    },
-    server: {
-        port: 3000,
-        open: true,
-    },
+    define: {
+      // Polyfill process.env.API_KEY for the @google/genai SDK usage
+      'process.env.API_KEY': JSON.stringify(env.API_KEY)
+    }
+  };
 });
